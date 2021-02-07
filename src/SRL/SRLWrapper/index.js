@@ -64,7 +64,7 @@ const SRLWrapper = ({
       }
 
       // Grabs images inside the ref
-      const collectedElements = array.querySelectorAll('img')
+      const collectedElements = array.querySelectorAll('.img')
       // Checks if the are elements in the DOM
       if (collectedElements.length > 0) {
         if (!context.isLoaded) {
@@ -92,9 +92,9 @@ const SRLWrapper = ({
           if (isImageByUser(e)) {
             return {
               id: index + '',
-              source: e.src || null,
+              source: e.src || e.dataset.src || null,
               caption: e.caption || null,
-              thumbnail: e.thumbnail || e.src || null,
+              thumbnail: e.thumbnail || e.src || e.dataset.src || null,
               type: 'image'
             }
           } else {
@@ -170,8 +170,8 @@ const SRLWrapper = ({
           /* Gatsby Images (Gatsby images creates two images, the first one is in base64 and we
           want to ignore that one but only if it's Gatsby because other base64 images are allowed)
           Also ignores images inside the <picture></picture> tag in Gatsby Images */
-          const isBase64Image = e.src?.includes('base64')
-          const isSVGImage = e.src?.includes('svg+xml')
+          const isBase64Image = e.src?.includes('base64') || e.dataset.src?.includes('base64')
+          const isSVGImage = e.src?.includes('svg+xml') || e.dataset.src?.includes('svg+xml')
           const isGatsbyImage = e.offsetParent?.className.includes(
             'gatsby-image-wrapper'
           )
@@ -180,6 +180,8 @@ const SRLWrapper = ({
           /* Next.js version 10 include an Image component which has a div with another image with a role of presentation that shouldn't be included */
           const isNextJsImage = e.getAttribute('role') === 'presentation'
           const isNextJsTransparentImage = e.src?.includes(
+            'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+          ) || e.dataset.src?.includes(
             'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
           )
 
@@ -197,9 +199,9 @@ const SRLWrapper = ({
               case IMAGE: {
                 const element = {
                   id: e.getAttribute('srl_elementid'),
-                  source: e.currentSrc || e.src,
+                  source: e.currentSrc || e.src || e.dataset.src,
                   caption: e.alt,
-                  thumbnail: e.currentSrc || e.src,
+                  thumbnail: e.currentSrc || e.src || e.dataset.src,
                   width: e.naturalWidth,
                   height: e.naturalHeight,
                   type: 'image'
@@ -217,7 +219,7 @@ const SRLWrapper = ({
                     e.parentElement.parentElement.parentElement.href || // UGLY FIX FOR GATSBY
                     null,
                   caption: e.alt || e.textContent,
-                  thumbnail: e.currentSrc || e.src || e.parentElement.href,
+                  thumbnail: e.currentSrc || e.src || e.dataset.src || e.parentElement.href,
                   width: null,
                   height: null,
                   type: 'gallery_image'
